@@ -1,0 +1,61 @@
+pipeline {
+    agent any
+    
+    environment{
+        DOCKERHUB_CREDENTIALS = credentials('docker-cred')
+        IMAGE_NAME = "hanifsuhail/expresscart"
+        KUBE_NAMESPACE = 'jenkins'
+        KUBERNETES_DEPLOYMENT_FILE = 'expresscart-deployment.yml'
+        KUBERNETES_SERVICE_FILE = 'expresscart-service.yml'
+    }
+
+    stages {
+        stage('Git Checkout') {
+            steps {
+                git branch: 'main', credentialsId: 'Git-Cred', url: 'https://github.com/Hanif-suhail/Project1.git'
+            }
+        }
+        
+        stage('Build & Tag Image') {
+            steps {
+                sh 'docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} -t ${IMAGE_NAME}:latest .'
+            }
+        }
+        
+        stage('Trivy Image scan') {
+            steps {
+                sh "trivy image --format table -o fs.html ${IMAGE_NAME}:${BUILD_NUMBER}"
+            }
+        }
+        
+        stage('Push the Image') {
+            steps {
+                script {
+                    // Log in to DockerHub
+                    sh "echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin"
+                    
+                    // Push Docker image to DockerHub
+                    sh 'docker push ${IMAGE_NAME}:${BUILD_NUMBER}'
+                    sh 'docker push ${IMAGE_NAME}:latest'
+                }
+            }
+        }
+        stage('Cleanup Docker Images') {
+            steps {
+                sh 'docker rmi ${IMAGE_NAME}:${BUILD_NUMBER}'
+                sh 'docker rmi ${IMAGE_NAME}:latest'
+                // Clean up the Docker images to save space
+            }
+        }
+        
+        stage('Deploy to Kubernetes') {
+            steps {
+                withKubeConfig(caCertificate: '', clusterName: 'minikube', contextName: '', credentialsId: 'K8-token', namespace: 'jenkins', restrictKubeConfigAccess: false, serverUrl: 'https://127.0.0.1:45538') {
+                    sh "kubectl apply -f mongodb-ds.yml -n ${KUBE_NAMESPACE} "
+                    sh "kubectl apply -f ${KUBERNETES_DEPLOYMENT_FILE} -n ${KUBE_NAMESPACE}" 
+                    sh "kubectl apply -f ${KUBERNETES_SERVICE_FILE} -n ${KUBE_NAMESPACE}"
+                }
+            }
+        }
+    }
+}
