@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: expresscart-service
+spec:
+  selector:
+    app: expresscart
+  ports:
+    - protocol: TCP
+      port: 1111
+      targetPort: 1111
+  type: LoadBalancer

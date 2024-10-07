@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: expresscart
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: expresscart
+  template:
+    metadata:
+      labels:
+        app: expresscart
+    spec:
+      containers:
+      - name: expresscart
+        image: hanifsuhail/expresscart:latest
+        ports:
+        - containerPort: 1111
+        env:
+        - name: NODE_ENV
+          value: "development"
+        - name: NODE_PATH
+          value: "/"
+        resources:
+          requests:
+            memory: "500Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
