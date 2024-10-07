@@ -15,6 +15,7 @@ spec:
       containers:
       - name: expresscart
         image: hanifsuhail/expresscart:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 1111
         env:
@@ -22,6 +23,8 @@ spec:
           value: "development"
         - name: NODE_PATH
           value: "/"
+        - name: MONGODB_URI
+          value: "mongodb://mongodb-service:27017/expresscart"
         resources:
           requests:
             memory: "500Mi"
