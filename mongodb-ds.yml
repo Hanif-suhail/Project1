@@ -21,7 +21,7 @@ spec:
         - containerPort: 27017
         volumeMounts:
         - name: mongo-storage
-          mountpath: /data/db
+          mountPath: /data/db
         command: ["mongod", "--smallfiles", "--logpath=/dev/null"]
         resources:
           requests:
