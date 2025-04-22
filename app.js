@@ -1,3 +1,55 @@
+const express = require('express');
+const promClient = require('prom-client');
+
+// Create a registry for the Prometheus metrics
+const register = new promClient.Registry();
+
+// Define metrics
+const httpRequestDurationMicroseconds = new promClient.Histogram({
+    name: 'http_request_duration_seconds',
+    help: 'Histogram of HTTP request duration in seconds',
+    buckets: [0.1, 0.3, 1.5, 3, 5, 10],
+    labelNames: ['method', 'route', 'status_code'],
+});
+
+const httpRequestCount = new promClient.Counter({
+    name: 'http_request_count',
+    help: 'Total number of HTTP requests',
+    labelNames: ['method', 'route', 'status_code'],
+});
+
+const activeRequestsGauge = new promClient.Gauge({
+    name: 'http_active_requests',
+    help: 'Current number of active HTTP requests',
+});
+
+register.registerMetric(httpRequestDurationMicroseconds);
+register.registerMetric(httpRequestCount);
+register.registerMetric(activeRequestsGauge);
+
+// Expose the Prometheus metrics endpoint
+app.get('/metrics', async (req, res) => {
+    res.set('Content-Type', register.contentType);
+    res.end(await register.metrics());
+});
+
+// Middleware for tracking request duration and active requests
+app.use((req, res, next) => {
+    const start = Date.now();
+    const route = req.route ? req.route.path : req.path;
+
+    activeRequestsGauge.inc(); // Increment active request count
+
+    res.on('finish', () => {
+        const duration = (Date.now() - start) / 1000; // Duration in seconds
+        httpRequestDurationMicroseconds.labels(req.method, route, res.statusCode).observe(duration);
+        httpRequestCount.labels(req.method, route, res.statusCode).inc(); // Increment request count
+        activeRequestsGauge.dec(); // Decrement active request count
+    });
+
+    next();
+});
+
 const fs = require('fs');
 const yenv = require('yenv');
 if(fs.existsSync('./env.yaml')){
