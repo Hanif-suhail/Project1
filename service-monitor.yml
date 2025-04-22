@@ -1,0 +1,13 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: expresscart-monitor
+  labels:
+    release: kube-prometheus-stack # Match your Helm release name
+spec:
+  selector:
+    matchLabels:
+      app: expresscart # Match Service labels
+  endpoints:
+  - port: http # Name of the Service port
+    path: /metrics # Metrics endpoint path

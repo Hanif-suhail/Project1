@@ -11,6 +11,10 @@ spec:
     metadata:
       labels:
         app: expresscart
+      annotations:
+        prometheus.io/scrape: "true" # Enable scraping
+        prometheus.io/path: "/metrics" # Your metrics endpoint path
+        prometheus.io/port: "1111" # Container port exposing metrics
     spec:
       containers:
       - name: expresscart
