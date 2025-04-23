@@ -1,7 +1,7 @@
 # Upgrade to Node.js 16/18 (14.x is deprecated)
 FROM node:14-alpine
 ENV NODE_VERSION 14.0.0
-
+RUN apk add --no-cache make gcc g++ python bash
 WORKDIR /var/expressCart
 
 # Copy ALL files (simpler than individual folders)
