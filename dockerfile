@@ -1,5 +1,6 @@
 # Upgrade to Node.js 16/18 (14.x is deprecated)
-FROM node:18-alpine
+FROM node:14-alpine
+ENV NODE_VERSION 14.0.0
 
 WORKDIR /var/expressCart
 
@@ -15,8 +16,10 @@ COPY app.js /var/expressCart/
 COPY package.json /var/expressCart/
 COPY deploy.js /var/expressCart/ 
 
+RUN npm install
 # Install dependencies in one step (faster build)
 RUN npm install prom-client response-time
+VOLUME /var/expressCart/data
 
 # Expose only the app port (metrics use same port)
 EXPOSE 1111
