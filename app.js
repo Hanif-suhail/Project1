@@ -1,5 +1,4 @@
 // ====================== BEGIN ORIGINAL CODE ======================
-const express = require('express');
 const promClient = require('prom-client'); // Added for metrics
 const responseTime = require('response-time'); // Added for request timing
 const fs = require('fs');
