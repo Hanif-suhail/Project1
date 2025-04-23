@@ -26,8 +26,6 @@ const { initDb, getDbUri } = require('./lib/db');
 const { writeGoogleData } = require('./lib/googledata');
 let handlebars = require('express-handlebars');
 const i18n = require('i18n');
-const promClient = require('prom-client');
-const responseTime = require('response-time'); // For timing middleware
 
 // Validate our settings schema
 const Ajv = require('ajv');
