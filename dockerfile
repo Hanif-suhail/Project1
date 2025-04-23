@@ -16,11 +16,10 @@ COPY package.json /var/expressCart/
 COPY deploy.js /var/expressCart/ 
 
 # Install dependencies in one step (faster build)
-RUN npm install --production --quiet \
-    && npm install prom-client response-time
+RUN npm install prom-client response-time
 
 # Expose only the app port (metrics use same port)
 EXPOSE 1111
 
 # Use direct node execution (better than npm start)
-CMD ["node", "app.js"]
+ENTRYPOINT ["npm", "start"]
